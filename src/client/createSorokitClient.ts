@@ -74,6 +74,8 @@ import {
 } from "../soroban/executeContract";
 import { invokeContract } from "../soroban/invokeContract";
 import { getContractMethods } from "../soroban/contractMetadata";
+import { detectContractUpgrade } from "../soroban/upgradeDetection";
+import type { UpgradeEvent } from "../soroban/upgradeDetection";
 import { streamContractEventsRealTime } from "../soroban/streamContractEventsRealTime";
 import type { StreamContractEventsRealTimeOptions } from "../soroban/streamContractEventsRealTime";
 import { createContractStateTracker } from "../soroban/contractStateTracker";
@@ -536,6 +538,12 @@ export interface SorokitClient {
       ttlMs?: number,
       timeoutMs?: number,
     ): Promise<SorokitResult<ContractMethod[]>>;
+    /** Detect deployed Wasm changes and invalidate contract-scoped caches. */
+    detectContractUpgrade(
+      contractId: string,
+      onUpgrade?: (event: UpgradeEvent) => void,
+      timeoutMs?: number,
+    ): Promise<SorokitResult<UpgradeEvent>>;
     /**
      * Simulate any transaction XDR for fee estimation and pre-flight checks.
      * Uses the Soroban RPC.
@@ -1611,6 +1619,17 @@ export function createSorokitClient(
               ),
           ).then(applyTx),
         ),
+      detectContractUpgrade: (contractId, onUpgrade, timeoutMs) =>
+        guard("soroban_get_methods", timeoutMs, () =>
+          withErrorHandling(
+            errorHandler,
+            { functionName: "soroban.detectContractUpgrade", params: { contractId } },
+            () => detectContractUpgrade(rpcUrl, contractId, {
+              ...(cache && { cache }),
+              ...(onUpgrade && { onUpgrade }),
+            }),
+          ),
+        ).then(applyTx),
       simulate: (transactionXdr, timeoutMs) =>
         guard("soroban_simulate", timeoutMs, (signal) =>
           deduplicator.deduplicate(

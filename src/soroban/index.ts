@@ -673,3 +673,6 @@ export type {
   TimeGroupedEvents,
   TimeGroupedMetrics,
 } from "./eventAnalytics";
+
+export { detectContractUpgrade } from "./upgradeDetection";
+export type { UpgradeEvent, ContractUpgradeDetectionOptions } from "./upgradeDetection";

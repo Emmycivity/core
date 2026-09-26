@@ -1463,3 +1463,5 @@ export type { EffectInfo, EffectsPage, GetEffectsOptions } from "./account/getEf
 export { getDataEntries } from "./account/dataEntries";
 export type { AccountDataEntries } from "./account/dataEntries";
 export { buildSetDataEntryTransaction, buildDeleteDataEntryTransaction } from "./transaction/dataEntry";
+export { detectContractUpgrade } from "./soroban/upgradeDetection";
+export type { UpgradeEvent, ContractUpgradeDetectionOptions } from "./soroban/upgradeDetection";
