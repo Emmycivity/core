@@ -31,6 +31,10 @@ export {
   generateDeviceFingerprint,
   evaluateDeviceTrust,
   DEFAULT_TRUST_THRESHOLD,
+  WalletAccountManager,
+  createAccountManager,
+  InMemoryAccountStorage,
+  createLocalStorageAccountStorage,
 } from "./wallet";
 export type {
   CreateSigningChallengeOptions,
@@ -40,6 +44,11 @@ export type {
   SignatureHintInput,
   SigningChallenge,
   SigningDelegationSignature,
+  AccountData,
+  AccountMetadata as WalletAccountMetadata,
+  AccountSwitchListener,
+  AccountSwitchUnsubscribe,
+  AccountStorageAdapter,
 } from "./wallet";
 export {
   discoverHardwareWallets,
