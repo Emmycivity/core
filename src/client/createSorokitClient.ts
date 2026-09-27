@@ -34,6 +34,8 @@ import type { DexActivityOptions, DexActivityResult, OfferInfo, TradeInfo } from
 import { streamAccount } from "../account/streamAccount";
 import { setSponsor, removeSponsor } from "../account/sponsorship";
 import { getSigners, getThresholds, analyzeSigningRequirement } from "../account/signers";
+import { getAccountHealthScore } from "../account/accountHealth";
+import type { AccountHealthReport } from "../account/accountHealth";
 import { getPaymentHistory } from "../account/paymentHistory";
 import { getEffects } from "../account/getEffects";
 import { getDataEntries } from "../account/dataEntries";

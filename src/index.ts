@@ -1473,3 +1473,15 @@ export type { AccountDataEntries } from "./account/dataEntries";
 export { buildSetDataEntryTransaction, buildDeleteDataEntryTransaction } from "./transaction/dataEntry";
 export { detectContractUpgrade } from "./soroban/upgradeDetection";
 export type { UpgradeEvent, ContractUpgradeDetectionOptions } from "./soroban/upgradeDetection";
+
+// ─── Account health score and risk assessment (#590) ──────────────────────────
+export { getAccountHealthScore, assessAccountHealth } from "./account/accountHealth";
+export type {
+  AccountHealthInput,
+  AccountHealthReport,
+  AccountHealthComponents,
+  AccountHealthRisk,
+  AccountHealthRiskSeverity,
+  AccountHealthLevel,
+  AssessAccountHealthOptions,
+} from "./account/accountHealth";
