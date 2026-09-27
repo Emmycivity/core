@@ -34,6 +34,8 @@ import type { DexActivityOptions, DexActivityResult, OfferInfo, TradeInfo } from
 import { streamAccount } from "../account/streamAccount";
 import { setSponsor, removeSponsor } from "../account/sponsorship";
 import { getSigners, getThresholds, analyzeSigningRequirement } from "../account/signers";
+import { getAccountHealthScore } from "../account/accountHealth";
+import type { AccountHealthReport } from "../account/accountHealth";
 import { getPaymentHistory } from "../account/paymentHistory";
 import { getEffects } from "../account/getEffects";
 import { getDataEntries } from "../account/dataEntries";
@@ -406,6 +408,15 @@ export interface SorokitClient {
     removeSponsor(account: string): SorokitResult<SponsorshipResult>;
     getOffers(publicKey: string, options?: DexActivityOptions, timeoutMs?: number): Promise<SorokitResult<DexActivityResult<OfferInfo>>>;
     getTrades(publicKey: string, options?: DexActivityOptions, timeoutMs?: number): Promise<SorokitResult<DexActivityResult<TradeInfo>>>;
+    /**
+     * Assess the security configuration of an account — master key weight,
+     * threshold reasonableness, and signer diversity — and return a 0–100
+     * health score with per-dimension components and identified risks (#590).
+     */
+    getAccountHealthScore(
+      publicKey: string,
+      timeoutMs?: number,
+    ): Promise<SorokitResult<AccountHealthReport>>;
   };
 
   readonly transaction: {
@@ -1294,6 +1305,17 @@ export function createSorokitClient(
             errorHandler,
             { functionName: "account.getTrades", params: { publicKey, options } },
             () => getTrades(horizonUrl, publicKey, options),
+          ).then(applyTx),
+        ),
+      getAccountHealthScore: (publicKey, timeoutMs) =>
+        guard("account_get", timeoutMs, () =>
+          withErrorHandling(
+            errorHandler,
+            {
+              functionName: "account.getAccountHealthScore",
+              params: { publicKey },
+            },
+            () => getAccountHealthScore(horizonUrl, publicKey),
           ).then(applyTx),
         ),
     },

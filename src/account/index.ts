@@ -167,3 +167,15 @@ export type {
   IssueAttestationOptions,
   RevocationEntry,
 } from "./attestationTypes";
+
+// ─── Account health score and risk assessment (#590) ──────────────────────────
+export { getAccountHealthScore, assessAccountHealth } from "./accountHealth";
+export type {
+  AccountHealthInput,
+  AccountHealthReport,
+  AccountHealthComponents,
+  AccountHealthRisk,
+  AccountHealthRiskSeverity,
+  AccountHealthLevel,
+  AssessAccountHealthOptions,
+} from "./accountHealth";
