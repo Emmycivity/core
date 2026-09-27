@@ -39,6 +39,11 @@ import type { AccountHealthReport } from "../account/accountHealth";
 import { getPaymentHistory } from "../account/paymentHistory";
 import { getEffects } from "../account/getEffects";
 import { getDataEntries } from "../account/dataEntries";
+import { simulateAccountMerge } from "../account/mergeSafety";
+import type {
+  AccountMergeSimulation,
+  SimulateAccountMergeOptions,
+} from "../account/mergeSafety";
 import type { SponsorshipResult } from "../account/sponsorship";
 import {
   buildPaymentTransaction,
@@ -409,14 +414,19 @@ export interface SorokitClient {
     getOffers(publicKey: string, options?: DexActivityOptions, timeoutMs?: number): Promise<SorokitResult<DexActivityResult<OfferInfo>>>;
     getTrades(publicKey: string, options?: DexActivityOptions, timeoutMs?: number): Promise<SorokitResult<DexActivityResult<TradeInfo>>>;
     /**
-     * Assess the security configuration of an account — master key weight,
-     * threshold reasonableness, and signer diversity — and return a 0–100
-     * health score with per-dimension components and identified risks (#590).
+     * Simulate an account merge and run all safety checks before any transaction
+     * is built or signed. Account merge is destructive and irreversible — use this
+     * to validate the operation before calling `transaction.buildAccountMerge`.
+     *
+     * Checks: address validity, destination exists, no open trustlines (unless
+     * `allowTrustlines` is set), minimum balance met.
      */
-    getAccountHealthScore(
-      publicKey: string,
+    simulateAccountMerge(
+      sourcePublicKey: string,
+      destinationPublicKey: string,
+      options?: SimulateAccountMergeOptions,
       timeoutMs?: number,
-    ): Promise<SorokitResult<AccountHealthReport>>;
+    ): Promise<SorokitResult<AccountMergeSimulation>>;
   };
 
   readonly transaction: {
@@ -1307,15 +1317,25 @@ export function createSorokitClient(
             () => getTrades(horizonUrl, publicKey, options),
           ).then(applyTx),
         ),
-      getAccountHealthScore: (publicKey, timeoutMs) =>
-        guard("account_get", timeoutMs, () =>
+      simulateAccountMerge: (sourcePublicKey, destinationPublicKey, options, timeoutMs) =>
+        guard("account_get", timeoutMs, (signal) =>
           withErrorHandling(
             errorHandler,
             {
-              functionName: "account.getAccountHealthScore",
-              params: { publicKey },
+              functionName: "account.simulateAccountMerge",
+              params: { sourcePublicKey, destinationPublicKey },
             },
-            () => getAccountHealthScore(horizonUrl, publicKey),
+            () =>
+              withLogging(
+                logger,
+                "account.simulateAccountMerge",
+                { sourcePublicKey, destinationPublicKey },
+                () =>
+                  simulateAccountMerge(horizonUrl, sourcePublicKey, destinationPublicKey, {
+                    ...options,
+                    ...(signal !== undefined ? { signal } : options?.signal !== undefined ? { signal: options.signal } : {}),
+                  }),
+              ),
           ).then(applyTx),
         ),
     },
