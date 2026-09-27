@@ -37,6 +37,11 @@ import { getSigners, getThresholds, analyzeSigningRequirement } from "../account
 import { getPaymentHistory } from "../account/paymentHistory";
 import { getEffects } from "../account/getEffects";
 import { getDataEntries } from "../account/dataEntries";
+import { simulateAccountMerge } from "../account/mergeSafety";
+import type {
+  AccountMergeSimulation,
+  SimulateAccountMergeOptions,
+} from "../account/mergeSafety";
 import type { SponsorshipResult } from "../account/sponsorship";
 import {
   buildPaymentTransaction,
@@ -406,6 +411,20 @@ export interface SorokitClient {
     removeSponsor(account: string): SorokitResult<SponsorshipResult>;
     getOffers(publicKey: string, options?: DexActivityOptions, timeoutMs?: number): Promise<SorokitResult<DexActivityResult<OfferInfo>>>;
     getTrades(publicKey: string, options?: DexActivityOptions, timeoutMs?: number): Promise<SorokitResult<DexActivityResult<TradeInfo>>>;
+    /**
+     * Simulate an account merge and run all safety checks before any transaction
+     * is built or signed. Account merge is destructive and irreversible — use this
+     * to validate the operation before calling `transaction.buildAccountMerge`.
+     *
+     * Checks: address validity, destination exists, no open trustlines (unless
+     * `allowTrustlines` is set), minimum balance met.
+     */
+    simulateAccountMerge(
+      sourcePublicKey: string,
+      destinationPublicKey: string,
+      options?: SimulateAccountMergeOptions,
+      timeoutMs?: number,
+    ): Promise<SorokitResult<AccountMergeSimulation>>;
   };
 
   readonly transaction: {
@@ -1294,6 +1313,27 @@ export function createSorokitClient(
             errorHandler,
             { functionName: "account.getTrades", params: { publicKey, options } },
             () => getTrades(horizonUrl, publicKey, options),
+          ).then(applyTx),
+        ),
+      simulateAccountMerge: (sourcePublicKey, destinationPublicKey, options, timeoutMs) =>
+        guard("account_get", timeoutMs, (signal) =>
+          withErrorHandling(
+            errorHandler,
+            {
+              functionName: "account.simulateAccountMerge",
+              params: { sourcePublicKey, destinationPublicKey },
+            },
+            () =>
+              withLogging(
+                logger,
+                "account.simulateAccountMerge",
+                { sourcePublicKey, destinationPublicKey },
+                () =>
+                  simulateAccountMerge(horizonUrl, sourcePublicKey, destinationPublicKey, {
+                    ...options,
+                    ...(signal !== undefined ? { signal } : options?.signal !== undefined ? { signal: options.signal } : {}),
+                  }),
+              ),
           ).then(applyTx),
         ),
     },

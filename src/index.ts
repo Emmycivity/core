@@ -1415,6 +1415,14 @@ export type {
   AggregatePortfolioOptions,
 } from "./account/portfolioAggregation";
 
+// ─── Account merge simulation & safety checks ─────────────────────────────────
+export { simulateAccountMerge } from "./account/mergeSafety";
+export type {
+  MergeTrustlineInfo,
+  AccountMergeSimulation,
+  SimulateAccountMergeOptions,
+} from "./account/mergeSafety";
+
 // ─── SDK health checks & diagnostics (#527) ───────────────────────────────────
 export {
   checkSdkHealth,
