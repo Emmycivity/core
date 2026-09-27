@@ -19,7 +19,7 @@
  * });
  */
 
-import { vi } from "vitest";
+import { createMockFunction } from "./mockAbstraction";
 import { ok } from "../shared/response";
 import { WalletType } from "../wallet/types";
 import type { SorokitClient } from "../client/createSorokitClient";
@@ -33,6 +33,8 @@ import type {
   SimulateTransactionResult,
 } from "../soroban/types";
 import type { ResolvedNetworkConfig } from "../shared/types";
+
+const vi = { fn: createMockFunction };
 
 // ─── Default fixtures ─────────────────────────────────────────────────────────
 
