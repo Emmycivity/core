@@ -51,6 +51,7 @@ It is deliberately stateless and framework-agnostic. It runs in Node, the browse
 - [Networks](#networks)
 - [Testing Utilities](#testing-utilities)
 - [Examples](#examples)
+- [Recipes and Cookbook](#recipes-and-cookbook)
 - [Workflow and Architecture Guides](#workflow-and-architecture-guides)
 - [New in This Release](#new-in-this-release)
 - [Design Principles](#design-principles)
@@ -617,6 +618,30 @@ Examples are type-checked against the SDK source with `npm run typecheck:example
 ## Contributing
 
 Pull requests are welcome. For significant changes, please open an issue first to discuss what you'd like to change.
+
+---
+
+## Recipes and Cookbook
+
+The [`docs/recipes/`](docs/recipes/) directory contains 15 practical, copy-paste-ready recipes for common Stellar and Soroban patterns. Each recipe includes a problem statement, working code, and testing tips.
+
+| # | Recipe | Use case |
+| --- | --- | --- |
+| 1 | [Multi-sig approval workflow](docs/recipes/01-multisig-approval.md) | N-of-M signatures for high-value payments |
+| 2 | [Escrow with timelock](docs/recipes/02-escrow-timelock.md) | Funds held until a future timestamp |
+| 3 | [DEX atomic swap](docs/recipes/03-dex-atomic-swap.md) | Swap two assets atomically on the Stellar DEX |
+| 4 | [Soroban contract invoke with error handling](docs/recipes/04-soroban-invoke.md) | Invoke a smart contract with full error recovery |
+| 5 | [Batch payment with progress tracking](docs/recipes/05-batch-payment.md) | Send many payments, track success/failure per item |
+| 6 | [Portfolio rebalancing](docs/recipes/06-portfolio-rebalancing.md) | Read balances and swap to hit target allocations |
+| 7 | [Offer management on DEX](docs/recipes/07-offer-management.md) | Create, update, and cancel limit orders |
+| 8 | [Account key rotation](docs/recipes/08-key-rotation.md) | Replace a compromised signing key securely |
+| 9 | [Payment with memo (SEP-7 style)](docs/recipes/09-payment-with-memo.md) | Attach a memo for exchange routing or identification |
+| 10 | [Account recovery workflow](docs/recipes/10-account-recovery.md) | Recover account access via designated guardians |
+| 11 | [Trustline management](docs/recipes/11-trustline-management.md) | Add, audit, and remove asset trustlines |
+| 12 | [Path payment (cross-asset)](docs/recipes/12-path-payment.md) | Send one asset, recipient receives a different asset |
+| 13 | [Real-time balance alerts and streaming](docs/recipes/13-balance-alerts-streaming.md) | React to balance changes without polling yourself |
+| 14 | [Contract deployment with validation](docs/recipes/14-contract-deployment.md) | Deploy a Soroban WASM with pre-flight checks |
+| 15 | [Fee estimation and surge pricing](docs/recipes/15-fee-estimation.md) | Estimate fees accurately before building a transaction |
 
 ---
 
