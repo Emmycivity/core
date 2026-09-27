@@ -15,6 +15,14 @@ import { signTransaction } from "../wallet/signTransaction";
 import { emptyWalletState } from "../wallet/index";
 import { generateDeviceFingerprint, evaluateDeviceTrust, DEFAULT_TRUST_THRESHOLD } from "../wallet/deviceTrust";
 import type { DeviceSignals, DeviceFingerprint, TrustHistoryEntry, TrustEvaluation } from "../wallet/deviceTrust";
+import { createAccountManager, WalletAccountManager } from "../wallet/accountManager";
+import type {
+  AccountData,
+  AccountMetadata,
+  AccountSwitchListener,
+  AccountSwitchUnsubscribe,
+  AccountStorageAdapter,
+} from "../wallet/accountManager";
 import { createI18n } from "../shared/i18n";
 import type { I18n, TranslationMap } from "../shared/i18n";
 import { getAccount } from "../account/getAccount";
@@ -66,6 +74,8 @@ import {
 } from "../soroban/executeContract";
 import { invokeContract } from "../soroban/invokeContract";
 import { getContractMethods } from "../soroban/contractMetadata";
+import { detectContractUpgrade } from "../soroban/upgradeDetection";
+import type { UpgradeEvent } from "../soroban/upgradeDetection";
 import { streamContractEventsRealTime } from "../soroban/streamContractEventsRealTime";
 import type { StreamContractEventsRealTimeOptions } from "../soroban/streamContractEventsRealTime";
 import { createContractStateTracker } from "../soroban/contractStateTracker";
@@ -259,6 +269,10 @@ export interface SorokitClientConfig {
   persistenceAdapter?: PersistenceAdapter;
   /** Request deduplication config for concurrent reads */
   dedupe?: DedupConfig;
+  /** Optional custom storage adapter for multi-account management */
+  accountStorageAdapter?: AccountStorageAdapter;
+  /** Custom WalletAccountManager instance */
+  accountManager?: WalletAccountManager;
 }
 
 // ─── Client interface ─────────────────────────────────────────────────────────
@@ -315,6 +329,23 @@ export interface SorokitClient {
      * Pure utility — returns SorokitResult<WalletState>, cannot fail.
      */
     emptyState(): SorokitResult<WalletState>;
+    /** Register an account with optional metadata (#579) */
+    addAccount(
+      publicKey: string,
+      metadata?: AccountMetadata,
+    ): Promise<SorokitResult<AccountData>>;
+    /** Unregister an account by public key (#579) */
+    removeAccount(publicKey: string): Promise<SorokitResult<boolean>>;
+    /** Switch active account to specified public key (#579) */
+    switchAccount(publicKey: string): Promise<SorokitResult<AccountData>>;
+    /** Get currently active account record (#579) */
+    getActiveAccount(): SorokitResult<AccountData | null>;
+    /** List all registered accounts (#579) */
+    listAccounts(): Promise<SorokitResult<AccountData[]>>;
+    /** Subscribe to real-time active account switches (#579) */
+    watchAccountSwitch(
+      listener: AccountSwitchListener,
+    ): AccountSwitchUnsubscribe;
   };
 
   readonly account: {
@@ -507,6 +538,12 @@ export interface SorokitClient {
       ttlMs?: number,
       timeoutMs?: number,
     ): Promise<SorokitResult<ContractMethod[]>>;
+    /** Detect deployed Wasm changes and invalidate contract-scoped caches. */
+    detectContractUpgrade(
+      contractId: string,
+      onUpgrade?: (event: UpgradeEvent) => void,
+      timeoutMs?: number,
+    ): Promise<SorokitResult<UpgradeEvent>>;
     /**
      * Simulate any transaction XDR for fee estimation and pre-flight checks.
      * Uses the Soroban RPC.
@@ -917,6 +954,13 @@ export function createSorokitClient(
     });
   }
 
+  // Initialize Multi-Account Manager (#579)
+  const accountManager =
+    config.accountManager ??
+    createAccountManager({
+      ...(config.accountStorageAdapter && { storageAdapter: config.accountStorageAdapter }),
+    });
+
   const client: SorokitClient = {
     i18n,
     version: SDK_VERSION,
@@ -1118,6 +1162,12 @@ export function createSorokitClient(
           ).then(applyTx),
         ),
       emptyState: () => emptyWalletState(),
+      addAccount: (publicKey, metadata) => accountManager.addAccount(publicKey, metadata),
+      removeAccount: (publicKey) => accountManager.removeAccount(publicKey),
+      switchAccount: (publicKey) => accountManager.switchAccount(publicKey),
+      getActiveAccount: () => accountManager.getActiveAccount(),
+      listAccounts: () => accountManager.listAccounts(),
+      watchAccountSwitch: (listener) => accountManager.watchAccountSwitch(listener),
     },
 
     account: {
@@ -1569,6 +1619,17 @@ export function createSorokitClient(
               ),
           ).then(applyTx),
         ),
+      detectContractUpgrade: (contractId, onUpgrade, timeoutMs) =>
+        guard("soroban_get_methods", timeoutMs, () =>
+          withErrorHandling(
+            errorHandler,
+            { functionName: "soroban.detectContractUpgrade", params: { contractId } },
+            () => detectContractUpgrade(rpcUrl, contractId, {
+              ...(cache && { cache }),
+              ...(onUpgrade && { onUpgrade }),
+            }),
+          ),
+        ).then(applyTx),
       simulate: (transactionXdr, timeoutMs) =>
         guard("soroban_simulate", timeoutMs, (signal) =>
           deduplicator.deduplicate(

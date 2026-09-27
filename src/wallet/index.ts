@@ -12,6 +12,21 @@ export { WalletType } from "./types";
 export { generateDeviceFingerprint, evaluateDeviceTrust, DEFAULT_TRUST_THRESHOLD } from "./deviceTrust";
 export type { DeviceSignals, DeviceFingerprint, TrustHistoryEntry, TrustScoreOptions, TrustEvaluation } from "./deviceTrust";
 
+export {
+  WalletAccountManager,
+  createAccountManager,
+  InMemoryAccountStorage,
+  createLocalStorageAccountStorage,
+} from "./accountManager";
+export type {
+  AccountData,
+  AccountMetadata,
+  AccountSwitchListener,
+  AccountSwitchUnsubscribe,
+  AccountStorageAdapter,
+  WalletAccountManagerConfig,
+} from "./accountManager";
+
 // ─── Wallet connection throttling and abuse detection (#506) ──────────────────
 export {
   checkThrottle,

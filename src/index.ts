@@ -31,6 +31,10 @@ export {
   generateDeviceFingerprint,
   evaluateDeviceTrust,
   DEFAULT_TRUST_THRESHOLD,
+  WalletAccountManager,
+  createAccountManager,
+  InMemoryAccountStorage,
+  createLocalStorageAccountStorage,
 } from "./wallet";
 export type {
   CreateSigningChallengeOptions,
@@ -40,6 +44,11 @@ export type {
   SignatureHintInput,
   SigningChallenge,
   SigningDelegationSignature,
+  AccountData,
+  AccountMetadata as WalletAccountMetadata,
+  AccountSwitchListener,
+  AccountSwitchUnsubscribe,
+  AccountStorageAdapter,
 } from "./wallet";
 export {
   discoverHardwareWallets,
@@ -385,7 +394,7 @@ export {
   analyzeBatchCost,
 } from "./transaction/costForecasting";
 export type {
-  CostForecast,
+  CostForecast as TransactionCostForecast,
   CostComparison,
   OptimizationSuggestion,
 } from "./transaction/costForecasting";
@@ -393,7 +402,7 @@ export type {
 // ─── Batch transaction submission (#589) ──────────────────────────────────────
 export {
   submitBatch,
-  getTransactionStatus,
+  getTransactionStatus as getBatchTransactionStatus,
   generateRollbackInstructions,
   wasAtomicExecuted,
   suggestRetryStrategy,
@@ -1454,3 +1463,5 @@ export type { EffectInfo, EffectsPage, GetEffectsOptions } from "./account/getEf
 export { getDataEntries } from "./account/dataEntries";
 export type { AccountDataEntries } from "./account/dataEntries";
 export { buildSetDataEntryTransaction, buildDeleteDataEntryTransaction } from "./transaction/dataEntry";
+export { detectContractUpgrade } from "./soroban/upgradeDetection";
+export type { UpgradeEvent, ContractUpgradeDetectionOptions } from "./soroban/upgradeDetection";
