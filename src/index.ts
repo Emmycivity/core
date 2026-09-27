@@ -1057,6 +1057,28 @@ export { createI18n, translateMessage, localizeError, DEFAULT_LOCALE, EN_TRANSLA
 export type { I18n, I18nConfig, MessageKey, TranslationCatalog, TranslationMap, LocalizedError, SupportedLocale } from "./shared/i18n";
 export type { SorokitCache } from "./shared/cache";
 export { createInMemoryCache, invalidateContractState } from "./shared/cache";
+
+// ─── Cache invalidation and TTL management (#597) ───────────────────────────────
+export {
+  CacheInvalidationManager,
+  createCacheInvalidationManager,
+  calculateAdaptiveTtl,
+  getBaseTtl,
+  getAffectedCacheKeys,
+  invalidateAccountCachesForTransaction,
+  createInvalidationPattern,
+} from "./shared/cacheInvalidation";
+export type {
+  InvalidationStrategy,
+  InvalidationStrategyConfig,
+  DataType,
+  CacheKeyMapping,
+  StateModifyingOperation,
+  HorizonInvalidationEvent,
+  CacheInvalidationConfig,
+  InvalidationStats,
+} from "./shared/cacheInvalidation";
+
 export { createTracedLogger } from "./shared/logger";
 export type { LogLevel, LoggerOptions, SorokitLogger } from "./shared/logger";
 export {
