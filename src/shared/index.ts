@@ -1,4 +1,5 @@
 export * from "./cache";
+export * from "./cacheInvalidation";
 export * from "./config";
 export * from "./constants";
 export * from "./errors";
