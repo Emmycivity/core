@@ -96,6 +96,14 @@ export type { EffectInfo, EffectsPage, GetEffectsOptions } from "./getEffects";
 export { getDataEntries } from "./dataEntries";
 export type { AccountDataEntries } from "./dataEntries";
 
+// ─── Account merge simulation & safety checks ─────────────────────────────────
+export { simulateAccountMerge } from "./mergeSafety";
+export type {
+  MergeTrustlineInfo,
+  AccountMergeSimulation,
+  SimulateAccountMergeOptions,
+} from "./mergeSafety";
+
 
 export { forecastBalance, forecastAccountBalance } from "./balanceForecast";
 export type {
