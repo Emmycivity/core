@@ -295,7 +295,7 @@ export class CacheInvalidationManager {
   private horizonUrl: string;
   private strategy: InvalidationStrategy;
   private adaptiveTtlEnabled: boolean;
-  private logger?: SorokitLogger;
+  private logger: SorokitLogger | undefined;
   private stats: InvalidationStats;
   private eventPollingIntervals: Map<string, NodeJS.Timeout>;
   private operationQueue: StateModifyingOperation[];
@@ -482,7 +482,6 @@ export class CacheInvalidationManager {
         fee_estimate: 0,
         transaction: 0,
       },
-      lastInvalidationTime: undefined,
       eventPollingActive: false,
     };
   }

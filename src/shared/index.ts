@@ -40,6 +40,7 @@ export {
   MAX_AMOUNT,
 } from "./amountValidation";
 export * from "./mainnetSafety";
+export * from "./keyManagement";
 
 export {
   StructuredLogger,

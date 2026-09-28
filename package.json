@@ -16,6 +16,11 @@
       "import": "./dist/testing/index.mjs",
       "require": "./dist/testing/index.js"
     },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.mjs",
+      "require": "./dist/core.js"
+    },
     "./wallet": {
       "types": "./dist/wallet/index.d.ts",
       "import": "./dist/wallet/index.mjs",
@@ -45,13 +50,28 @@
       "types": "./dist/shared/index.d.ts",
       "import": "./dist/shared/index.mjs",
       "require": "./dist/shared/index.js"
+    },
+    "./integration": {
+      "types": "./dist/integration/index.d.ts",
+      "import": "./dist/integration/index.mjs",
+      "require": "./dist/integration/index.js"
+    },
+    "./lazy": {
+      "types": "./dist/lazy.d.ts",
+      "import": "./dist/lazy.mjs",
+      "require": "./dist/lazy.js"
+    },
+    "./shared/keyManagement": {
+      "types": "./dist/shared/keyManagement.d.ts",
+      "import": "./dist/shared/keyManagement.mjs",
+      "require": "./dist/shared/keyManagement.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && tsc --emitDeclarationOnly",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "typecheck:examples": "tsc -p examples/router-swap/tsconfig.json",
@@ -104,5 +124,8 @@
     "typescript": "^5.4.0",
     "vitest": "^1.6.0"
   },
-  "packageManager": "yarn@4.9.4+sha512.7b1cb0b62abba6a537b3a2ce00811a843bea02bcf53138581a6ae5b1bf563f734872bd47de49ce32a9ca9dcaff995aa789577ffb16811da7c603dcf69e73750b"
+  "packageManager": "yarn@4.9.4+sha512.7b1cb0b62abba6a537b3a2ce00811a843bea02bcf53138581a6ae5b1bf563f734872bd47de49ce32a9ca9dcaff995aa789577ffb16811da7c603dcf69e73750b",
+  "dependencies": {
+    "@scure/bip39": "^1.6.0"
+  }
 }
