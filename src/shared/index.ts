@@ -48,3 +48,8 @@ export type {
   LogConfig,
   LogLevel as StructuredLogLevel,
 } from "./structuredLogging.js";
+
+// ─── OpenTelemetry (#600) & SmartCache (#604) ────────────────────────────────
+export * from "./openTelemetry";
+export * from "./smartCache";
+

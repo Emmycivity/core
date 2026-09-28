@@ -1507,3 +1507,63 @@ export type {
   AccountHealthLevel,
   AssessAccountHealthOptions,
 } from "./account/accountHealth";
+
+// ─── OpenTelemetry (#600) ───────────────────────────────────────────────────
+export {
+  OpenTelemetryManager,
+  SorokitSpan,
+  InMemorySpanExporter,
+  ConsoleSpanExporter,
+  OtlpSpanExporter,
+  JaegerSpanExporter,
+  createOpenTelemetryManager,
+} from "./shared/openTelemetry";
+export type {
+  OtelSpan,
+  OtelSpanContext,
+  OtelSpanExporter,
+  OtelMetricRecord,
+  OtelMetricSummary,
+  OpenTelemetryConfig,
+  SpanKind,
+  SpanStatus,
+  SpanData,
+} from "./shared/openTelemetry";
+
+// ─── SEP-7 Handler (#602) ────────────────────────────────────────────────────
+export {
+  parseSep7Uri,
+  validateSep7Uri,
+  buildFromSep7Uri,
+  generateSep7Uri,
+} from "./integration/sep7Handler";
+export type {
+  Sep7OperationType,
+  Sep7BaseParams,
+  Sep7PayParams,
+  Sep7TxParams,
+  Sep7ChangeTrustParams,
+  Sep7ManageOfferParams,
+  Sep7PathPaymentParams,
+  Sep7Params,
+  Sep7ValidationResult,
+  Sep7BuildOptions,
+} from "./integration/sep7Handler";
+
+
+// ─── Smart Cache (#604) ──────────────────────────────────────────────────────
+export {
+  SmartCache,
+  createSmartCache,
+  generateCacheKey,
+  hashParams,
+} from "./shared/smartCache";
+export type {
+  CacheDataType,
+  CacheMetrics,
+  SmartCacheConfig,
+  CacheKeyOptions,
+  GetOrSetOptions,
+  StateChangeNotification,
+} from "./shared/smartCache";
+
