@@ -23,6 +23,12 @@ import type {
   AccountSwitchUnsubscribe,
   AccountStorageAdapter,
 } from "../wallet/accountManager";
+import { createWalletEventEmitter, toConnectedEvent } from "../wallet/eventEmitter";
+import type {
+  WalletEventName,
+  WalletEventListener,
+  WalletEventUnsubscribe,
+} from "../wallet/eventEmitter";
 import { createI18n } from "../shared/i18n";
 import type { I18n, TranslationMap } from "../shared/i18n";
 import { getAccount } from "../account/getAccount";
@@ -62,6 +68,8 @@ import { compose } from "../transaction/compose";
 import type { ComposeOptions } from "../transaction/compose";
 import { submitTransaction } from "../transaction/submitTransaction";
 import { getTransactionStatus } from "../transaction/status";
+import { previewTransaction } from "../transaction/simulationPreview";
+import type { TransactionPreview } from "../transaction/simulationPreview";
 import { estimateFee } from "../transaction/estimateFee";
 import { streamTransactions } from "../transaction/streamTransactions";
 import { exportTransactionHistory } from "../transaction/exportTransactionHistory";
@@ -353,6 +361,24 @@ export interface SorokitClient {
     watchAccountSwitch(
       listener: AccountSwitchListener,
     ): AccountSwitchUnsubscribe;
+    /**
+     * Named wallet lifecycle event subscriptions (#613): "connected",
+     * "disconnected", "accountChanged", "networkChanged".
+     *
+     * "networkChanged" is never emitted by any bundled WalletAdapter today —
+     * no adapter currently detects the connected wallet switching networks.
+     * It exists for a custom adapter to report via a WalletEventEmitter it
+     * holds a reference to, and will start firing once one does.
+     */
+    on<E extends WalletEventName>(
+      event: E,
+      listener: WalletEventListener<E>,
+    ): WalletEventUnsubscribe;
+    /** Remove a previously registered wallet event listener (#613) */
+    off<E extends WalletEventName>(
+      event: E,
+      listener: WalletEventListener<E>,
+    ): void;
   };
 
   readonly account: {
@@ -496,6 +522,20 @@ export interface SorokitClient {
       signedXdr: string,
       options?: number | (MainnetSafetyOptions & { timeoutMs?: number }),
     ): Promise<SorokitResult<TransactionResult>>;
+    /**
+     * Preview a transaction's effects before submitting it: projected balance
+     * changes, fee, and other state changes (e.g. new trustlines) (#612).
+     *
+     * `sourcePublicKey` is accepted for API-ergonomics parity with the rest
+     * of the transaction namespace, but the transaction's own encoded source
+     * account is what determines its effects — the two must match the
+     * transaction being previewed.
+     */
+    previewTransaction(
+      transactionXdr: string,
+      sourcePublicKey: string,
+      timeoutMs?: number,
+    ): Promise<SorokitResult<TransactionPreview>>;
     /** Fetch the status of a transaction by hash */
     getStatus(
       hash: string,
@@ -982,6 +1022,13 @@ export function createSorokitClient(
       ...(config.accountStorageAdapter && { storageAdapter: config.accountStorageAdapter }),
     });
 
+  // Wallet event emitter (#613) — bridges accountManager's own switch
+  // notifications into the named "accountChanged" event.
+  const walletEvents = createWalletEventEmitter();
+  accountManager.watchAccountSwitch((activeAccount, previousAccount) => {
+    walletEvents.emit("accountChanged", { activeAccount, previousAccount });
+  });
+
   const client: SorokitClient = {
     i18n,
     version: SDK_VERSION,
@@ -1140,7 +1187,14 @@ export function createSorokitClient(
             },
             action,
           ).then(applyTx),
-        );
+        ).then((result) => {
+          // Emit "connected" (#613) after the wrapped result is finalized
+          if (result.status === "ok") {
+            const connectedEvent = toConnectedEvent(result.data);
+            if (connectedEvent) walletEvents.emit("connected", connectedEvent);
+          }
+          return result;
+        });
       },
       disconnect: (adapter, timeoutMs) =>
         guard("wallet_disconnect", timeoutMs, () =>
@@ -1164,7 +1218,13 @@ export function createSorokitClient(
                 return result;
               }),
           ).then(applyTx),
-        ),
+        ).then((result) => {
+          // Emit "disconnected" (#613) after the wrapped result is finalized
+          if (result.status === "ok") {
+            walletEvents.emit("disconnected", { walletType: adapter.walletType });
+          }
+          return result;
+        }),
       signTransaction: (adapter, input, timeoutMs) =>
         guard("wallet_sign", timeoutMs, () =>
           withErrorHandling(
@@ -1189,6 +1249,8 @@ export function createSorokitClient(
       getActiveAccount: () => accountManager.getActiveAccount(),
       listAccounts: () => accountManager.listAccounts(),
       watchAccountSwitch: (listener) => accountManager.watchAccountSwitch(listener),
+      on: (event, listener) => walletEvents.on(event, listener),
+      off: (event, listener) => walletEvents.off(event, listener),
     },
 
     account: {
@@ -1528,6 +1590,20 @@ export function createSorokitClient(
         );
       },
       submitTransaction: (signedXdr, options) => client.transaction.submit(signedXdr, options),
+      previewTransaction: (transactionXdr, _sourcePublicKey, timeoutMs) =>
+        guard("tx_preview", timeoutMs, (signal) =>
+          withErrorHandling(
+            errorHandler,
+            { functionName: "transaction.previewTransaction" },
+            () => {
+              logger.debug("transaction.previewTransaction");
+              return previewTransaction(horizonUrl, networkPassphrase, transactionXdr, {
+                rpcUrl,
+                signal,
+              });
+            },
+          ).then(applyTx),
+        ),
       getStatus: (hash, timeoutMs) =>
         guard("tx_status", timeoutMs, (signal) =>
           deduplicator.deduplicate(

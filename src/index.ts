@@ -1131,6 +1131,31 @@ export {
 } from "./shared/validateToken";
 export type { TokenAsset } from "./shared/validateToken";
 
+// ─── Amount formatting (#616) ──────────────────────────────────────────────
+export { formatAmount, DEFAULT_ASSET_DECIMALS } from "./shared/amountFormatter";
+export type { FormatAmountOptions } from "./shared/amountFormatter";
+
+// ─── Asset registry (#614) ─────────────────────────────────────────────────
+export {
+  getAssetInfo,
+  registerAsset,
+  unregisterAsset,
+  listKnownAssets,
+  canonicalAssetId,
+} from "./shared/assetRegistry";
+export type { AssetInfo, AssetMetadata } from "./shared/assetRegistry";
+
+// ─── Transaction simulation and safe execution preview (#612) ─────────────
+export { previewTransaction } from "./transaction/simulationPreview";
+export type {
+  TransactionPreview,
+  PreviewTransactionOptions,
+  PreviewAsset,
+  BalanceEffect,
+  StateChange,
+  PreviewSummaryLine,
+} from "./transaction/simulationPreview";
+
 // ─── Distributed tracing (#212) ────────────────────────────────────────────
 export {
   getTraceContext,
