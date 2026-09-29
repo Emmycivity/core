@@ -436,6 +436,8 @@ export class CacheInvalidationManager {
     for (const key of keys) {
       this.cache.invalidate(key);
     }
+    this.stats.totalInvalidations += keys.length;
+    this.stats.lastInvalidationTime = Date.now();
     this.logger?.debug("cache.invalidation.keys_invalidated", {
       count: keys.length,
     });
