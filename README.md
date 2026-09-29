@@ -536,6 +536,10 @@ const adapter = createMockWalletAdapter();
 
 > Requires `vitest` as a peer dependency.
 
+For the full testing philosophy (unit vs integration vs property tests, mocking
+conventions, coverage targets), see
+[docs/testing-strategy.md](docs/testing-strategy.md).
+
 ---
 
 ## Examples
@@ -653,6 +657,7 @@ The documentation now includes task-oriented, executable workflows and a contrib
 | --- | --- |
 | [`docs/workflows.md`](docs/workflows.md) | Complete transaction lifecycle, wallet signing, multisignature signing, Soroban calls, trustline approval, cost planning, refunds, and recovery patterns |
 | [`docs/architecture.md`](docs/architecture.md) | Module boundaries, data flow, result/error conventions, extension guidance, and migration from direct Stellar SDK usage |
+| [`docs/testing-strategy.md`](docs/testing-strategy.md) | Unit, integration, and property test conventions, mocking patterns, coverage targets, and how to add a new test file |
 
 Both guides use the current exported API shape and keep policy, construction, signing, submission, and recovery concerns separate.
 
