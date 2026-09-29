@@ -45,6 +45,11 @@
       "types": "./dist/shared/index.d.ts",
       "import": "./dist/shared/index.mjs",
       "require": "./dist/shared/index.js"
+    },
+    "./integration": {
+      "types": "./dist/integration/index.d.ts",
+      "import": "./dist/integration/index.mjs",
+      "require": "./dist/integration/index.js"
     }
   },
   "files": [
@@ -63,7 +68,8 @@
     "clean": "rimraf dist",
     "docs": "typedoc",
     "validate:exports": "node scripts/validate-exports.js",
-    "size:check": "node scripts/check-bundle-size.mjs"
+    "size:check": "node scripts/check-bundle-size.mjs",
+    "analyze:unused": "node scripts/analyzeUnused.js"
   },
   "keywords": [
     "stellar",

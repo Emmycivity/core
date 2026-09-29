@@ -10,6 +10,7 @@ export default defineConfig({
     "src/soroban/index.ts",
     "src/network/index.ts",
     "src/shared/index.ts",
+    "src/integration/index.ts",
   ],
   format: ["cjs", "esm"],
   dts: true,
