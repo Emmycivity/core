@@ -4,6 +4,7 @@ export * from "./config";
 export * from "./constants";
 export * from "./errors";
 export * from "./logger";
+export * from "./devtoolsBridge";
 export * from "./metrics";
 export * from "./response";
 export * from "./utils";
