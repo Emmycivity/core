@@ -39,6 +39,16 @@ export {
   MAX_STROOPS,
   MAX_AMOUNT,
 } from "./amountValidation";
+export { formatAmount, DEFAULT_ASSET_DECIMALS } from "./amountFormatter";
+export type { FormatAmountOptions } from "./amountFormatter";
+export {
+  getAssetInfo,
+  registerAsset,
+  unregisterAsset,
+  listKnownAssets,
+  canonicalAssetId,
+} from "./assetRegistry";
+export type { AssetInfo, AssetMetadata } from "./assetRegistry";
 export * from "./mainnetSafety";
 
 export {
